@@ -1,8 +1,5 @@
 module DateRangePicker
   module DateRangePickerHelper
-
-    puts "no self"
-
     def date_range_picker(attr = {})
       random_num = Random.rand(10000...99999)
       range_picker_id = attr[:range_picker_id] || "date-range-picker-"+random_num.to_s
