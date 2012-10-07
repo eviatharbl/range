@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    date-range-picker (0.0.1)
+    date-range-picker (0.0.1), :git => 'git@github.com:eviatharbl/range.git'
       rails (~> 3.2.7)
 
 GEM
