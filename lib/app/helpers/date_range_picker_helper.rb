@@ -1,6 +1,7 @@
 module DateRangePicker
   module DateRangePickerHelper
 
+    puts "updated"
 
     def self.date_range_picker(attr = {})
       random_num = Random.rand(10000...99999);
