@@ -1,4 +1,5 @@
+require "app/helpers/date_range_picker_helper.rb"
 module DateRangePicker
-  require "app/helpers/date_range_picker_helper.rb"
-
+  ActionController::Base.helper(DateRangePicker::DateRangePickerHelper)
+  puts "ok"
 end
