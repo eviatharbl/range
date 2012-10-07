@@ -1,4 +1,4 @@
-source "git@github.com:eviatharbl/range.git"
+source "http://rubygems.org"
 
 # Declare your gem's dependencies in date-range-picker.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
