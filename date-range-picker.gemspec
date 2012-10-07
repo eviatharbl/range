@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = DateRangePicker::VERSION
   s.authors     = ["ni"]
   s.email       = ["i@ni.com"]
-  s.homepage    = "ni.com"
+  s.homepage    = "http://www.naturalint.com/"
   s.summary     = "DateRangePicker."
   s.description = "DateRangePicker."
 
