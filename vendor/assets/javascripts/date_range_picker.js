@@ -224,7 +224,7 @@ function dateRangePicker(containerId, attr) {
 
     function LastMonthPreset(obj) {
         this.getTitle = function () {
-            return theMonthBeforeXMonthsName(obj, 1);
+            return "Last month";
         };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 1);
@@ -243,7 +243,7 @@ function dateRangePicker(containerId, attr) {
 
     function ThreeMonthsBeforePreset(obj) {
         this.getTitle = function () {
-            return theMonthBeforeXMonthsName(obj, 3);
+            return "Last " + theMonthBeforeXMonthsName(obj, 3);
         };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 3);
@@ -253,7 +253,7 @@ function dateRangePicker(containerId, attr) {
 
     function FourMonthsBeforePreset(obj) {
         this.getTitle = function () {
-            return theMonthBeforeXMonthsName(obj, 4);
+            return "Last " + theMonthBeforeXMonthsName(obj, 4);
         };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 4);
