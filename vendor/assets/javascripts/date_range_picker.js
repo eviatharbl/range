@@ -1,79 +1,75 @@
 function dateRangePicker(containerId, attr) {
-
+    var self = this;
     this.init = function (containerId, attr) {
 
         this.container = document.getElementById(containerId);
         this.callbacks = attr["callbacks"] || [];
-
-        this.presets = []
-        this.presets["Custom"] = new customPreset(this);
-        this.presets["This month"] = new thisMonthPreset(this);
-        this.presets["Last Month"] = new lastMonthPreset(this);
-        this.presets["2 Months Before"] = new twoMonthsBeforePreset(this);
-        this.presets["3 Months Before"] = new threeMonthsBeforePreset(this);
-        this.presets["4 Months Before"] = new fourMonthsBeforePreset(this);
-
-
         this.cookieName = attr["cookie_name"] || "date_range_picker_preset";
-
         this.startDateInputId = attr["start_date_input_id"];
         this.endDateInputId = attr["end_date_input_id"];
 
-        this.render();
-
         this.loadPresets();
+
+        this.render();
 
         if (!this.loadFromSession())
             this.setPreset(attr['default_preset'] == null ? "Last Month" : attr['default_preset']);
-        if(this.currentPreset == "Custom")
-            this.applyPreset();
-    }
+    };
 
     this.setRange = function (startDate, endDate) {
         this.setStartDate(startDate);
         this.setEndDate(endDate);
-    }
+    };
 
     this.setStartDate = function (date) {
 
         this.startDate = (this.is_valid_date(date) ? new Date(date) : new Date());
         if (this.currentPreset == "Custom") {
             $("#" + this.container.id + " .start-date").val($.datepicker.formatDate('dd-mm-yy', this.startDate));
-        }else
+        } else
             $("#" + this.container.id + " .start-date").html($.datepicker.formatDate('M dd, yy', this.startDate));
 
-    }
+    };
 
     this.setEndDate = function (date) {
         this.endDate = (this.is_valid_date(date) ? new Date(date) : new Date());
-        if(this.currentPreset == "Custom")
+        if (this.currentPreset == "Custom")
             $("#" + this.container.id + " .end-date").val($.datepicker.formatDate('dd-mm-yy', this.endDate));
         else
             $("#" + this.container.id + " .end-date").html($.datepicker.formatDate('M dd, yy', this.endDate));
-    }
+    };
 
 
     this.loadPresets = function () {
+        this.presets = [];
+        this.presets["Custom"] = new CustomPreset(this);
+        this.presets["This month"] = new ThisMonthPreset(this);
+        this.presets["Last Month"] = new LastMonthPreset(this);
+        this.presets["2 Months Before"] = new TwoMonthsBeforePreset(this);
+        this.presets["3 Months Before"] = new ThreeMonthsBeforePreset(this);
+        this.presets["4 Months Before"] = new FourMonthsBeforePreset(this);
+    };
+
+    this.renderPresets = function () {
         var i = 0;
-        var tmp_this = this;
-        var preset;
-        for (preset in this.presets) {
-            html = "<li class='preset" + i + "-" + containerId + (i == 0 ? ' border-under' : '') + "' data='" + preset + "'><a>" + this.presets[preset].getTitle() + "</a></li>";
+
+        for (var preset in this.presets) {
+            var html = "<li class='preset" + i + "-" + containerId + (i == 0 ? ' border-under' : '') + "' data='" + preset + "'><a>" + this.presets[preset].getTitle() + "</a></li>";
             $("#" + this.container.id + " .dropdown-menu").append(html);
             $(".preset" + i + "-" + containerId).click(function () {
-                tmp_this.setPreset($(this).attr('data'))
+                self.setPreset($(this).attr('data'));
             });
             i++;
         }
-    }
+    };
 
     this.getStartDate = function () {
         return this.startDate
-    }
+    };
 
     this.getEndDate = function () {
         return this.endDate
-    }
+    };
 
 
     this.setCustomFormat = function () {
@@ -86,40 +82,60 @@ function dateRangePicker(containerId, attr) {
                 '</td></tr></table>'
         );
 
-        $(".date-picker").datepicker({ dateFormat:"dd-mm-yy" });
-        $('#' + this.container.id + '_start_date_field').datepicker("setDate", this.startDate);
-        $('#' + this.container.id + '_end_date_field').datepicker("setDate", this.endDate);
+
+        $("#" + this.container.id + '_start_date_field').datepicker({
+            dateFormat:"dd-mm-yy",
+            maxDate: self.getEndDate(),
+            onSelect:function (selectedDate) {
+                $("#" + self.container.id + '_end_date_field').datepicker("option", "minDate", selectedDate);
+            }
+        });
+
+        $("#" + this.container.id + '_end_date_field').datepicker({
+            dateFormat:"dd-mm-yy",
+            minDate: self.getStartDate(),
+            onSelect:function (selectedDate) {
+                $("#" + self.container.id + '_start_date_field').datepicker("option", "maxDate", selectedDate);
+            }
+        });
+
+        $('#' + this.container.id + '_start_date_field').datepicker("setDate", this.getStartDate());
+        $('#' + this.container.id + '_end_date_field').datepicker("setDate", this.getEndDate());
+
         $(".range-date-picker-field").bind('click', false);
+
         $(".go-button").bind('click', false);
         $(".date-picker").focus(function () {
             $(".date-range-picker").removeClass("open")
         });
-        tmp_this = this;
+
         $(".go-button").click(
             function () {
-                tmp_this.setStartDate($.datepicker.parseDate("dd-mm-yy", $('#' + tmp_this.container.id + '_start_date_field').val()));
-                tmp_this.setEndDate($.datepicker.parseDate("dd-mm-yy", $('#' + tmp_this.container.id + '_end_date_field').val()));
-                tmp_this.applyPreset()
+                self.setStartDate($.datepicker.parseDate("dd-mm-yy", $('#' + self.container.id + '_start_date_field').val()));
+                self.setEndDate($.datepicker.parseDate("dd-mm-yy", $('#' + self.container.id + '_end_date_field').val()));
+                self.applyPreset()
             });
-    }
+    };
 
     this.setPresetFormat = function (title) {
         $("#" + this.container.id + " .text").html(
             '<span class="title">' + title + '</span><br>' +
                 '<span class="dates"><span class="start-date"></span> - <span class="end-date"></span></span>'
         );
-    }
+    };
 
     this.render = function () {
 
-        var obj = $("#" + this.container.id)
+        var obj = $("#" + this.container.id);
         obj.addClass("btn-group date-range-picker");
         obj.append(
             '<a class="btn text" href="#"  data-toggle="dropdown" ></a>' +
-                '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>' +
+                '<a class="btn dropdown-btn" data-toggle="dropdown" href="#"><span class="caret"></span></a>' +
                 '<ul class="dropdown-menu"></ul>'
-        )
-    }
+        );
+
+        this.renderPresets();
+    };
 
 
     this.setPreset = function (preset) {
@@ -130,29 +146,28 @@ function dateRangePicker(containerId, attr) {
             this.setPresetFormat(this.presets[preset].getTitle());
         this.presets[preset].apply();
         if (preset != "Custom") {
-            this.applyPreset()
+            this.applyPreset();
         }
-    }
+    };
 
 
     this.applyPreset = function () {
         this.saveToSession();
         this.setExternalFormData();
         this.invokeCallbacks();
-    }
+    };
 
 
     this.setExternalFormData = function () {
         if (this.startDateInputId != null)
-            $("#" + this.startDateInputId).val($.datepicker.formatDate("dd-mm-yy", this.getStartDate()))
+            $("#" + this.startDateInputId).val($.datepicker.formatDate("dd-mm-yy", this.getStartDate()));
         if (this.endDateInputId != null)
-            $("#" + this.endDateInputId).val($.datepicker.formatDate("dd-mm-yy", this.getEndDate()))
-    }
+            $("#" + this.endDateInputId).val($.datepicker.formatDate("dd-mm-yy", this.getEndDate()));
+    };
 
 
     this.invokeCallbacks = function () {
-        var callbackMethod = null;
-        for (callbackMethod in this.callbacks) {
+        for (var callbackMethod in this.callbacks) {
             if (typeof window[this.callbacks[callbackMethod]] == 'function')
                 f = window[this.callbacks[callbackMethod]]
             else if (typeof this.callbacks[callbackMethod] == 'function')
@@ -162,7 +177,7 @@ function dateRangePicker(containerId, attr) {
             }
             f(this.getStartDate(), this.getEndDate(), this);
         }
-    }
+    };
 
 
     this.saveToSession = function () {
@@ -171,116 +186,119 @@ function dateRangePicker(containerId, attr) {
         cookie.startDate = this.startDate;
         cookie.endDate = this.endDate;
         setCookie(this.cookieName, JSON.stringify(cookie));
-    }
+    };
 
     this.loadFromSession = function () {
         var cookie = eval('(' + getCookie(this.cookieName) + ')');
         if (cookie == null || cookie.preset == null)
             return false;
-        this.setPreset(cookie.preset);
+
         this.setStartDate(cookie.startDate);
         this.setEndDate(cookie.endDate);
+        this.setPreset(cookie.preset);
+        if (this.currentPreset == "Custom")
+            this.applyPreset();
         return true;
-    }
+    };
 
-    this.is_valid_date = function(date) {
-        d = new Date(date)
+    this.is_valid_date = function (date) {
+        var d = new Date(date);
         if (Object.prototype.toString.call(d) !== "[object Date]")
             return false;
         return !isNaN(d.getTime());
-    }
+    };
 
-    this.init(containerId, attr)
-
+    this.init(containerId, attr);
 
     // presets
-    function customPreset(obj) {
+    function CustomPreset(obj) {
         this.getTitle = function () {
             return "Custom";
 
-        }
+        };
         this.apply = function () {
 
-        }
+        };
 
     }
 
-    function lastMonthPreset(obj) {
+    function LastMonthPreset(obj) {
         this.getTitle = function () {
             return theMonthBeforeXMonthsName(obj, 1);
-        }
+        };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 1);
-        }
+        };
     }
 
-    function twoMonthsBeforePreset(obj) {
+    function TwoMonthsBeforePreset(obj) {
         this.getTitle = function () {
             return theMonthBeforeXMonthsName(obj, 2);
-        }
+        };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 2);
-        }
+        };
     }
 
 
-    function threeMonthsBeforePreset(obj) {
+    function ThreeMonthsBeforePreset(obj) {
         this.getTitle = function () {
             return theMonthBeforeXMonthsName(obj, 3);
-        }
+        };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 3);
-        }
+        };
     }
 
 
-    function fourMonthsBeforePreset(obj) {
+    function FourMonthsBeforePreset(obj) {
         this.getTitle = function () {
             return theMonthBeforeXMonthsName(obj, 4);
-        }
+        };
         this.apply = function () {
             theMonthBeforeXMonths(obj, 4);
-        }
+        };
     }
 
 
-    function lastThreeMonthsPreset(obj) {
+    function LastThreeMonthsPreset(obj) {
         this.getTitle = function () {
             return "Last 3 months";
-        }
+        };
         this.apply = function () {
             lastXMonths(obj, 3);
-        }
+        };
     }
 
-    function thisMonthPreset(obj) {
+    function ThisMonthPreset(obj) {
         this.getTitle = function () {
             return "This month";
-        }
+        };
         this.apply = function () {
             obj.setStartDate((new Date().setDate(1)));
             obj.setEndDate(new Date());
 
-        }
+        };
     }
 
     function lastXMonths(obj, months) {
         var now = new Date();
-        var lastMonth = ((now.getMonth() - months ) % 12)
+        var lastMonth = ((now.getMonth() - months ) % 12);
         obj.setStartDate(new Date(now.getFullYear(), lastMonth, 1));
         obj.setEndDate(new Date(now.getFullYear(), lastMonth + months, 0));
     }
 
     function theMonthBeforeXMonths(obj, x) {
         var now = new Date();
-        var lastMonth = ((now.getMonth() - x ) % 12)
+        var lastMonth = ((now.getMonth() - x ) % 12);
         obj.setStartDate(new Date(now.getFullYear(), lastMonth, 1));
         obj.setEndDate(new Date(now.getFullYear(), lastMonth + 1, 0));
     }
+
     function theMonthBeforeXMonthsName(obj, x) {
         d = new Date();
         d.setDate(1);
-        d.setMonth(d.getMonth()-x);
+        d.setMonth(d.getMonth() - x);
         return d.toString("MMMM");
     }
 
@@ -288,7 +306,7 @@ function dateRangePicker(containerId, attr) {
     function setCookie(cookieName, value, exdays) {
         var exdate = new Date();
         exdate.setDate(exdate.getDate() + exdays);
-        var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        var c_value = encodeURI(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
         document.cookie = cookieName + "=" + c_value;
     }
 
@@ -299,7 +317,7 @@ function dateRangePicker(containerId, attr) {
             y = ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
             x = x.replace(/^\s+|\s+$/g, "");
             if (x == cookieName) {
-                return unescape(y);
+                return decodeURI(y);
             }
         }
         return null;

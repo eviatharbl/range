@@ -55,12 +55,13 @@
     box-shadow: none;
   }
 
-  .dropdown-toggle .caret {
-    margin-top: 18px;
-  }
 
-  .dropdown-toggle {
+
+  .dropdown-btn {
     border-left: none;
+    .caret {
+      margin-top: 18px;
+    }
   }
 
   .dropdown-menu {
@@ -89,7 +90,7 @@
   }
 }
 
-.date-range-picker.open .btn.dropdown-toggle {
+.date-range-picker.open .btn.dropdown-btn {
   box-shadow: none;
   -webkit-box-shadow: none;
   background: transparent;

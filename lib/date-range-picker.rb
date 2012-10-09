@@ -4,8 +4,7 @@ module DateRangePicker
 
   module Rails
     class Engine < ::Rails::Engine
+      # Add vendor assets to the application assets
     end
   end
-
-
 end
